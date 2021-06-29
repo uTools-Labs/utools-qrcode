@@ -53,7 +53,16 @@ export default class App extends React.Component {
         return
       }
       if (type === 'window') {
-        this.setState({ value: window.utools.getCurrentBrowserUrl() || '' })
+        if (window.utools.readCurrentBrowserUrl) {
+          window.utools.readCurrentBrowserUrl().then((url) => {
+            this.setState({ value: url })
+          })
+        } else {
+          // 适配旧版
+          setTimeout(() => {
+            this.setState({ value: window.utools.getCurrentBrowserUrl() || '' })
+          })
+        }
         return
       }
       if (type === 'img') {
