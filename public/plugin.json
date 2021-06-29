@@ -26,7 +26,7 @@
           "match": {
             "app": ["chrome.exe", "firefox.exe", "MicrosoftEdge.exe", "iexplore.exe", "opera.exe", "brave.exe", "msedge.exe", "Google Chrome.app", "Safari.app", "Opera.app", "Vivaldi.app", "Brave Browser.app", "Microsoft Edge.app"]
           },
-          "label": "URL 二维码"
+          "label": "网页二维码"
         }
       ]
     }
