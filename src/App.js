@@ -54,6 +54,7 @@ export default class App extends React.Component {
       }
       if (type === 'window') {
         if (window.utools.readCurrentBrowserUrl) {
+          this.setState({ value: '' })
           window.utools.readCurrentBrowserUrl().then((url) => {
             this.setState({ value: url })
           })
@@ -83,7 +84,9 @@ export default class App extends React.Component {
   }
 
   handleInputChange = (event) => {
-    this.setState({ value: event.target.value })
+    let value = event.target.value
+    if (value.length > 1024) value = value.substr(0, 1024)
+    this.setState({ value })
   }
 
   handleCopy = () => {
