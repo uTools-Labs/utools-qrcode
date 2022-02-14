@@ -18,13 +18,19 @@ html, body {
   .MuiFilledInput-root {
     border-radius: 0;
   }
-  & > div {
-    &:last-child {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+  .app-input {
+    position: relative;
+    .app-btn-screencapture {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
     }
+  }
+  .app-output {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .app-qrcode {
     display: flex;

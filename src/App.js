@@ -1,37 +1,35 @@
 import React from 'react'
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
-import TextField from '@material-ui/core/TextField'
-import Paper from '@material-ui/core/Paper'
-import Tooltip from '@material-ui/core/Tooltip'
-import Snackbar from '@material-ui/core/Snackbar'
-import Alert from '@material-ui/lab/Alert'
+import { createTheme, ThemeProvider } from '@mui/material/styles'
+import IconButton from '@mui/material/IconButton'
+import TextField from '@mui/material/TextField'
+import Paper from '@mui/material/Paper'
+import Tooltip from '@mui/material/Tooltip'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
 import QRCode from 'qrcode.react'
 import qrcodeParser from 'qrcode-parser'
+import CropIcon from '@mui/icons-material/Crop'
 
 const themeDic = {
-  light: createMuiTheme({
+  light: createTheme({
     palette: {
-      type: 'light'
-    },
-    props: {
-      MuiButtonBase: {
-        disableRipple: true
+      mode: 'light',
+      primary: {
+        main: '#3f51b5'
+      },
+      secondary: {
+        main: '#f50057'
       }
     }
   }),
-  dark: createMuiTheme({
+  dark: createTheme({
     palette: {
-      type: 'dark',
+      mode: 'dark',
       primary: {
         main: '#90caf9'
       },
       secondary: {
         main: '#f48fb1'
-      }
-    },
-    props: {
-      MuiButtonBase: {
-        disableRipple: true
       }
     }
   })
@@ -43,6 +41,18 @@ export default class App extends React.Component {
     value: '',
     openMessage: false,
     message: { key: 0, type: 'success', body: '' }
+  }
+
+  scanImage = (imageBase64) => {
+    this.setState({ value: '' })
+    qrcodeParser(imageBase64)
+      .then(result => {
+        this.setState({ value: result, openMessage: true, message: { key: Date.now(), type: 'success', body: '已成功识别图片中二维码' } })
+        setTimeout(() => { document.getElementById('text-input').select() })
+      })
+      .catch(() => {
+        this.setState({ openMessage: true, message: { key: Date.now(), type: 'error', body: '无法识别图片中二维码' } })
+      })
   }
 
   componentDidMount () {
@@ -67,20 +77,20 @@ export default class App extends React.Component {
         return
       }
       if (type === 'img') {
-        this.setState({ value: '' })
-        qrcodeParser(payload)
-          .then(result => {
-            this.setState({ value: result.data, openMessage: true, message: { key: Date.now(), type: 'success', body: '已成功解码图片中二维码' } })
-            setTimeout(() => { document.getElementById('text-input').select() })
-          })
-          .catch(() => {
-            this.setState({ openMessage: true, message: { key: Date.now(), type: 'error', body: '无法识别图片中二维码' } })
-          })
+        this.scanImage(payload)
+        return
+      }
+      if (payload.includes('扫码') || payload.includes('截图')) {
+        this.handleScreencapture()
       }
     })
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
       this.setState({ theme: e.matches ? 'dark' : 'light' })
     })
+  }
+
+  handleScreencapture = () => {
+    window.utools.screenCapture(this.scanImage)
   }
 
   handleInputChange = (event) => {
@@ -103,19 +113,26 @@ export default class App extends React.Component {
     return (
       <ThemeProvider theme={themeDic[theme]}>
         <div className='app-page'>
-          <TextField
-            label=''
-            id='text-input'
-            placeholder='输入文字内容或粘贴截图'
-            autoFocus
-            multiline
-            rows={12}
-            variant='filled'
-            fullWidth
-            onChange={this.handleInputChange}
-            value={value}
-          />
-          <div>
+          <div className='app-input'>
+            <TextField
+              label=''
+              id='text-input'
+              placeholder='输入文字内容或粘贴截图'
+              autoFocus
+              multiline
+              rows={10}
+              variant='filled'
+              fullWidth
+              onChange={this.handleInputChange}
+              value={value}
+            />
+            <Tooltip placement='left' title='截图识别二维码'>
+              <IconButton onClick={this.handleScreencapture} className='app-btn-screencapture'>
+                <CropIcon />
+              </IconButton>
+            </Tooltip>
+          </div>
+          <div className='app-output'>
             <Tooltip placement='top' title='点击复制二维码图片'>
               <Paper className='app-qrcode'>
                 <QRCode id='qrcode' size={256} value={value} onClick={this.handleCopy} />
@@ -124,7 +141,7 @@ export default class App extends React.Component {
             <Snackbar
               key={message.key}
               open={openMessage}
-              anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
               autoHideDuration={3000}
               onClose={this.handleCloseMessage}
             >
