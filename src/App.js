@@ -1,6 +1,7 @@
 import React from 'react'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import IconButton from '@mui/material/IconButton'
+import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import Paper from '@mui/material/Paper'
 import Tooltip from '@mui/material/Tooltip'
@@ -47,7 +48,8 @@ export default class App extends React.Component {
     this.setState({ value: '' })
     qrcodeParser(imageBase64)
       .then(result => {
-        this.setState({ value: result, openMessage: true, message: { key: Date.now(), type: 'success', body: '已成功识别图片中二维码' } })
+        const isUrl = /^https?:\/\//.test(result)
+        this.setState({ value: result, openMessage: true, message: { key: Date.now(), type: 'success', body: '已成功识别图片中二维码', isUrl } })
         setTimeout(() => { document.getElementById('text-input').select() })
       })
       .catch(() => {
@@ -108,6 +110,11 @@ export default class App extends React.Component {
     this.setState({ openMessage: false })
   }
 
+  handleOpenMessgeUrl = () => {
+    if (!/^https?:\/\//.test(this.state.value)) return
+    window.utools.shellOpenExternal(this.state.value)
+  }
+
   render () {
     const { theme, value, openMessage, message } = this.state
     return (
@@ -145,7 +152,13 @@ export default class App extends React.Component {
               autoHideDuration={3000}
               onClose={this.handleCloseMessage}
             >
-              <Alert onClose={this.handleCloseMessage} variant='filled' severity={message.type}>{message.body}</Alert>
+              <Alert
+                onClose={this.handleCloseMessage}
+                variant='filled'
+                severity={message.type}
+                action={message.isUrl && <Button onClick={this.handleOpenMessgeUrl} variant='contained' size='small' color='secondary'>打开链接</Button>}
+              >{message.body}
+              </Alert>
             </Snackbar>
           </div>
         </div>
